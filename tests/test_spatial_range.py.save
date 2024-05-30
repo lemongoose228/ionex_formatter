@@ -92,6 +92,4 @@ class TestSpatialGridDimensions():
     def test_min_decimal_reduce_accuracy_raises(self):
         with pytest.raises(DecimalDigitReduceAccuracyError):
             SpatialRange(0.0, 1.999, 0.0, decimal=2)
-
-
-
+ 

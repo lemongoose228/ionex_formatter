@@ -70,6 +70,7 @@ class IonexHeader_V_1_1:
     def _update(self):
         self.init_fields("ionex_formatter/header_line_descriptions.json")
 
+
     def init_fields(self, description_path: str | Path) -> None:
         """
         Loads description and compares whether all labels contains necessary 
@@ -105,7 +106,6 @@ class IonexHeader_V_1_1:
                 if token[-1] == 'A' or token[0].isalpha():
                     format_tokens_number += 1
                     continue
-                raise ValueError('Unknown format token {}'.format(token))
             if len(label_tokens) == format_tokens_number:
                 self.AUTO_FORMATTED_LABELS.append(label)
         self.AUTO_FORMATTED_LABELS.sort()
@@ -121,13 +121,8 @@ class IonexHeader_V_1_1:
         :raises: TypeError
         """
         descriptions_file = Path(file_path)
-        if not descriptions_file.exists():  
-            raise FileNotFoundError(str(file_path))
         with open(descriptions_file) as f:
             self.HEADER_DESCRIPTIONS = json.load(f)
-        if not isinstance(self.HEADER_DESCRIPTIONS, dict):
-            msg = "Descriptions in {} must be dict".format(file_path)
-            raise TypeError(msg)
         for key, val in self.HEADER_DESCRIPTIONS.items():
             if not(isinstance(key, str) and isinstance(val, str)):
                 key_type = type(key)

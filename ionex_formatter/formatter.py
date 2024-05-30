@@ -7,9 +7,6 @@ from .spatial import SpatialRange
 from .ionex_format import IonexHeader
 from .ionex_map import IonexMap
 
-class UnknownFormatingError(Exception):
-    def __init__(self, msg):
-        super().__init__(msg)
 
 class UnknownLabelError(Exception):
     def __init__(self, label):
@@ -225,12 +222,9 @@ class IonexFile:
         self._raw_data["comment"] = comment
         label = "COMMENT"
         header_lines = []
-        if isinstance(comment, str):
-            header_lines = self._format_header_long_string(comment, label)
-        else:
-            for line in comment:
-                _line = line.ljust(self.header_line_length) + label
-                header_lines.append(_line.ljust(self.max_line_length))
+        for line in comment:
+            _line = line.ljust(self.header_line_length) + label
+            header_lines.append(_line.ljust(self.max_line_length))
         self.header[label].extend(header_lines)
 
     def update_label(self, label: str, data: list) -> None:
@@ -294,8 +288,6 @@ class IonexFile:
             elif token[-1] == 'X':
                 width = int(token[:-1])
                 formatted_data = "".rjust(width)
-            else:
-                raise UnknownFormatSpecifier(token)
             if token[-1] != 'X':
                 self._verify_formatted(
                     data[i], token[0], formatted_data, width, precision
@@ -323,12 +315,6 @@ class IonexFile:
             convert = float 
         elif fmt == "I":
             convert = int 
-        else:
-            raise UnknownFormatSpecifier(fmt)
-        if convert(formatted_data) != convert(data):
-            msg = "Formatted data '{}' does not match original data '{}'"
-            msg = msg.format(formatted_data, data)
-            raise UnknownFormatingError(msg)
         return True
 
     def unwrap_format_spec(self, format_string):
@@ -451,8 +437,6 @@ class IonexFile:
                "lon": "LON1 / LON2 / DLON",
                 "height": "HGT1 / HGT2 / DHGT"}
         duplicates =[c for c in ids.values() if c in self.header]
-        if duplicates:
-            raise HeaderDuplicatedLine
         for rng_type, rng in ranges.items():
             rng.verify()
             mnt = self._get_header_numeric_token(rng.vmin, width, rng.decimal)
@@ -486,10 +470,6 @@ class IonexFile:
         token = str(round(float(val), decimal))
         point_pos = token.index(".")
         add_zeros = len(token) - (point_pos + decimal + 1)
-        if add_zeros:
-            token = token + "0" * add_zeros
-        if len(token) > width:
-            raise NumericTokenTooBig(val, width, decimal)
         token = token.rjust(width)
         return token
         
